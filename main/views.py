@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status 
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from .serializers import  UserSerializer, LoginSerializer, GenerateAccountSerializer
+from .serializers import  UserSerializer, LoginSerializer
 from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -78,43 +78,37 @@ def user_view(request):
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
 def signup_view(request):
-    
+    user=request.data
+
     if request.method == "POST":
     #Allows user to signup or create account
         serializer = UserSerializer(data=request.data) #deserialize the data
         
         if serializer.is_valid(): #validate the data that was passed
-            serializer.save()
-            data = {
-                'message' : 'success',
-                'data'  : serializer.data
-            }
-            return Response(data, status=status.HTTP_201_CREATED)
-        else:
-            data = {
-                'message' : 'failed',
-                'error'  : serializer.errors
-            }
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
-# @api_view(['GET'])
-# @authentication_classes([BasicAuthentication])
-# # @permission_classes([IsAdminUser])
-# # def user_view(request):
-    
-#     elif request.method == 'GET':
-#         # Get all the users in the database
-#         all_users = User.objects.all()
-        
-#         serializer = UserSerializer(all_users, many=True)
-        
-#         data = {
-#            "message":"successful",
-#            "data": serializer.data
-#         }
-    
-    
-#         # return JsonResponse(data)
-#         return Response(data, status=status.HTTP_200_OK)
+            user=User.objects.create(first_name=serializer.data['first_name'], last_name=serializer.data['last_name'], email=serializer.data['email'], password=serializer.data['password'], phone=serializer.data['phone'], branch=serializer.data['branch'], bank_name=serializer.data['bank_name'], date_created=serializer.data['date_created'] account_num=account_num))
+            if "user" in serializer.validated_data.keys():
+                serializer.validated_data.pop("account_num") 
+                user= serializer.validated_data["user"]
+           
+                if user: 
+                # user = User.objects.create(account_num)
+                    num = [str(i) for i in range(10)]
+                    account = ['9']
+                    account.extend([random.choice(num) for i in range(9)])
+                    account_num = "".join(account) 
+                    serializer.save()
+                    data = {
+                        'message' : 'success',
+                        'data'  : serializer.data
+                    }
+                    return Response(data, status=status.HTTP_201_CREATED)
+                else:
+                    data = {
+                        'message' : 'failed',
+                        'error'  : serializer.errors
+                    }
+                    return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
    
         
 
@@ -173,162 +167,102 @@ def login_view(request):
 #            "data": serializer.data
 #        }
 
-@swagger_auto_schema(methods=['POST'] ,
-                    request_body=GenerateAccountSerializer())
-@api_view(["POST"])
-@authentication_classes([BasicAuthentication])
- # @permission_classes([IsAuthenticated])
-def generate_acc_num(request):
-    serializer = GenerateAccountSerializer(data=request.data)
+# @swagger_auto_schema(methods=['POST'] ,
+#                     request_body=LoginSerializer())
+# @api_view(["POST"])
+# @authentication_classes([BasicAuthentication])
+#  # @permission_classes([IsAuthenticated])
+# def generate_acc_num(request, account_num):
+    
+#     if request.method == "POST":
 
-    if serializer.is_valid():
-        user = serializer.generate()
-        user_serializer = UserSerializer(user)
-        data = {
-            'message' : 'account generated',
-            'data' : user_serializer.data
-        }
-        return Response(data, status=status.HTTP_200_OK)
+#         serializer = LoginSerializer(data=request.account_num)
         
-    else:
-        data = {
-            'message' : 'failed',
-            'error'  : serializer.errors
-        }
-        return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
-    # user = request.user
-
-    # if request.method == "POST":
-    #     serializer = UserSerializer(user)
-        
-    #     data = {
-    #        "message":"successful",
-    #        "data": serializer.data
-    #     }
-    #     return Response(data, status=status.HTTP_200_OK)
-
-    # elif request.method == "POST":        
-    #     serializer = AccountSerializer(data=request.data)
+#         if serializer.is_valid():
             
-  
-    # for i in range(10):
-
-    #     num = [str(i)]
-    #     num = [str(i) for i in range(10)]
-    #     acc = ['9']
-    #     acc.extend([random.choice(num) for i in range(9)])
-    #     acc_num = "".join(acc)
-        
-    #     if acc_num in user.keys():
-    #         return generate_acc_num()
-        
-    #     # return acc_num
-    #     data = {
-    #     "message":"successful",
-    #     "data": serializer.data
-    #     }
-
-    #     return Response(data, status=status.HTTP_200_OK)
-
-    # else:
-    #             data = {
-    #                     'message' : 'Please enter a valid email and password'
-    #                 }
-    #             return Response(data, status=status.HTTP_401_UNAUTHORIZED)
-
-# @api_view
-# def withdraw_view(request): 
-#     user = request.user   
-#     if request.method == 'PUT':
-#         serializer = DepositSerializer(user, data=request.data, partial=True)
-#         if serializer.is_valid(): 
-#             if 'password' in serializer.validated_data.keys():
-#                 raise ValidationError(detail={
-#                     "message":"Edit password action not allowed"
-#                 }, code=status.HTTP_403_FORBIDDEN)
-                
-#             serializer.save()
-#             data = {
-#                 'message' : 'success',
-#                 'data'  : serializer.data
-#             }
-#             return Response(data, status=status.HTTP_202_ACCEPTED)
+#             user = authenticate(email=serializer.validated_data['email'], password=serializer.validated_data['password'])
+            
+#             if user: 
+#                 user = User.objects.create(account_num)
+#                 num = [str(i) for i in range(10)]
+#                 account = ['9']
+#                 account.extend([random.choice(num) for i in range(9)])
+#                 account_num = "".join(account)
+#                 data = {
+#                         'message' : 'success',
+#                         'data'  : model_to_dict(user, ['id', 
+#                                                     'first_name',
+#                                                     'last_name',
+#                                                     'email',
+#                                                     'phone',
+#                                                     'account_num',
+#                                                     'is_admin'])
+#                     }
+#                 return Response(account_num, status=status.HTTP_201_CREATED)
+#             else:
+#                 data = {
+#                         'message' : 'Please enter a valid email and password'
+#                     }
+#                 return Response(data, status=status.HTTP_401_UNAUTHORIZED)
 #         else:
 #             data = {
 #                 'message' : 'failed',
 #                 'error'  : serializer.errors
 #             }
 #             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        
-#     elif request.method=="DELETE":
-#         user.delete()
-        
-#         return Response({}, status=status.HTTP_204_NO_CONTENT)
 
 
-# @swagger_auto_schema(method='post', 
-#                 request_body=TokenObtainPairSerializer())
+
+
+# @swagger_auto_schema(methods=['POST'] ,
+#                     request_body=MenuSerializer())
 # @api_view(['POST'])
-# def as_view(request):
-#     serializer = TokenObtainPairSerializer(data=request.data)
-
-#     if serializer.is_valid(): #validate the data that was passed
-#         token = serializer.view()
-#         token_serializer = TokenObtainPairSerializer()
-#         data = {
-#             'message' : 'success',
-#             'data'  : serializer.data
-#         }
-#         return Response(data, status=status.HTTP_201_CREATED)
-#     else:
-#         data = {
-#             'message' : 'failed',
-#             'error'  : serializer.errors
-#         }
-#         return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-# @swagger_auto_schema(methods=['put'] ,
-#                     request_body=DepositSerializer())
-# @api_view(['GET', 'PUT', 'DELETE'])
 # @authentication_classes([BasicAuthentication])
 # @permission_classes([IsAuthenticated])
-# def deposit(request, account_details):
+# def make_carts(request,vendor_user_id): 
+#     # add food to cart
+#     user=request.user  #user creating cart 
+#     if user.is_customer==False:
+#         raise PermissionDenied(detail={"message":f"Permission Denied. Only customers can perform this action"})
+#     if request.method == 'POST':
+#         serializer = CartSerializer(data=request.data)
+#         if serializer.is_valid(): 
+#             if "user" in serializer.validated_data.keys():
+#                 serializer.validated_data.pop("user")  
+#             food = serializer.validated_data["food"]
+#             ven=User.objects.filter(id=vendor_user_id)
+#             if ven.exists():
+#                 pass
+#             else:
+#                 data = {
+#                 'message' : 'Vendor does not exist',
+#             }
+#                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-    
-#     # try:
-#     #     song = Song.objects.get(id=song_id)
-#     # except Song.DoesNotExist:
+#             check = Menu.objects.filter(food=food,user=User.objects.get(id=vendor_user_id))
+#             if check.exists():
+#                 pass
+#             else:
+#                 raise PermissionDenied(detail={"message":f"Vendor {vendor_user_id} does not have this item."}) 
 
-#     #     data = {
-#     #         'message' : 'failed',
-#     #         'error'  : f"Song with ID {song_id} does not exist."
-#     #     }
-#     #     return Response(data, status=status.HTTP_404_NOT_FOUND)
-    
-#     if request.method == "PUT":
-#         deposits = Deposit.objects.get(id=account_details)
-#         serializer = DepositSerializer(deposits)
-        
-#         data = {
-#            "message":"successful",
-#            "data": serializer.data
-#         }
-    
-    
-#         return Response(data, status=status.HTTP_200_OK)
-    
-#     elif request.method == 'PUT':
-#         serializer = SongSerializer(song, data=request.data, partial=True)
-#         if serializer.is_valid():
-                
-#             serializer.save()
+            
+#             if len(Cart.objects.filter(user=user)) != 0:
+#                 diff_vens=Cart.objects.filter(user=user).first() #checks if the item has a diff vendor from what is already in cart
+#                 if diff_vens.food.user.id != vendor_user_id:
+#                     data = {
+#                     'message' : 'Cart can only contain food from one vendor',
+#                 }
+#                     return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+
+            
+
+#             cart = Cart.objects.create(user=user, food=food)
+#             new_serializer = CartSerializer(cart)
+            
 #             data = {
 #                 'message' : 'success',
-#                 'data'  : serializer.data
+#                 'data'  : new_serializer.data
 #             }
 #             return Response(data, status=status.HTTP_202_ACCEPTED)
 #         else:
@@ -337,8 +271,3 @@ def generate_acc_num(request):
 #                 'error'  : serializer.errors
 #             }
 #             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        
-#     elif request.method=="DELETE":
-#         song.delete()
-        
-#         return Response({}, status=status.HTTP_204_NO_CONTENT)

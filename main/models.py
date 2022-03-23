@@ -34,6 +34,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone = models.CharField(_('phone number'), unique=True, max_length=15)
     first_name = models.CharField(_('first name'), max_length=30, blank=True)
     last_name = models.CharField(_('last name'), max_length=30, blank=True)
+    account_num = models.FloatField(_('account num'),  blank=True )
     bank_name = models.CharField(_('bank name'), max_length= 200, choices=BANK, blank=True)
     branch = models.CharField(_('branch name'), max_length=100, blank=True)
     branch_address = models.CharField(('branch address'), max_length=250)
@@ -89,10 +90,10 @@ class Token(models.Model):
 #     def __str_(self):
 # #         return self.name
 
-class Account(models.Model):
-    # email = models.EmailField()
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="account")   
-    date_created = models.DateTimeField(_('date created'), auto_now_add=True)
+# class Account(models.Model):
+#     # email = models.EmailField()
+#     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="account")   
+#     date_created = models.DateTimeField(_('date created'), auto_now_add=True)
 
      
 #     def __str__(self) -> str:

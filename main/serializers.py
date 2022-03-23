@@ -10,7 +10,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework.exceptions import ValidationError
 # from BankAPI.main.models import Account
-from main.models import User, Account
+from main.models import User
 # from django.core.mail import send_mail
 # import jwt
 # from datetime import datetime, timedelta
@@ -27,7 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         #fields = '__all__'
-        fields = ['id','first_name', 'last_name', 'email', 'password', 'phone','branch','bank_name','date_created']
+        fields = ['id','first_name', 'last_name','account_num', 'email', 'password', 'phone','branch','bank_name','date_created']
 
 
 
@@ -38,33 +38,33 @@ class LoginSerializer(serializers.Serializer):
     #     model = User
 #         fields = '__all__'
 
-class GenerateAccountSerializer(serializers.ModelSerializer):
-    acc_num = serializers.FloatField()
-    # email = serializers.EmailField()
-    # password = serializers.CharField(max_length=255)
-    class Meta:
-        model = Account
-        fields = ['acc_num']
+# class GenerateAccountSerializer(serializers.ModelSerializer):
+#     acc_num = serializers.FloatField()
+#     # email = serializers.EmailField()
+#     # password = serializers.CharField(max_length=255)
+#     class Meta:
+#         model = Account
+#         fields = ['acc_num']
 
-    # @property
-    def generate(self):
-        acc_num = self.validated_data('acc_num')
-        try:
-            acc_num = Account.objects.get(acc_num)
-            num = [str(i) for i in range(10)]
-            acc = ['9']
-            acc.extend([random.choice(num) for i in range(9)])
-            acc_num = "".join(acc)
-        except User.DoesNotExist:
-            raise ValidationError(detail={
-                "error":"Invalid User"
-            }) 
+#     # @property
+#     def generate(self):
+#         acc_num = self.validated_data('acc_num')
+#         try:
+#             acc_num = Account.objects.get(acc_num)
+#             num = [str(i) for i in range(10)]
+#             acc = ['9']
+#             acc.extend([random.choice(num) for i in range(9)])
+#             acc_num = "".join(acc)
+#         except User.DoesNotExist:
+#             raise ValidationError(detail={
+#                 "error":"Invalid User"
+#             }) 
 
-        except Exception:
-            Account.objects.filter(acc_num).delete()
-            raise ValidationError(detail={
-                "error":"unable to generate account number"
-            })
+#         except Exception:
+#             Account.objects.filter(acc_num).delete()
+#             raise ValidationError(detail={
+#                 "error":"unable to generate account number"
+#             })
         # if account_num in user.keys():
             
         #     return generate_acc_num()
