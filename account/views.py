@@ -1,5 +1,6 @@
 # from lib2to3.pgen2 import token
 import random
+# from typing_extensions import Self
 from rest_framework.response import Response
 from rest_framework import status 
 from django.http import JsonResponse
@@ -24,6 +25,16 @@ User = get_user_model()
 @authentication_classes([BasicAuthentication])
 # @permission_classes([IsAdminUser])
 def user_view(request):
+
+    # try:
+    #     user = User.objects.get(id=user_id)
+    # except User.DoesNotExist:
+
+    #     data = {
+    #         'message' : 'failed',
+    #         'error'  : f"Post with ID {user_id} does not exist."
+    #     }
+    #     return Response(data, status=status.HTTP_404_NOT_FOUND)
     
     if request.method == 'GET':
         # Get all the users in the database
@@ -39,6 +50,7 @@ def user_view(request):
     
         # return JsonResponse(data)
         return Response(data, status=status.HTTP_200_OK)
+    
 
 
 @swagger_auto_schema(method='post', 
@@ -75,51 +87,123 @@ def user_view(request):
                     }
 )
 
+# account_number = generate_acc_num()
+
+# print(account_number)
+
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
 def signup_view(request):
-    user=request.data
 
+    def generate_acc_num():
+        num = [str(i) for i in range(10)]
+        acc = ['9']
+        acc.extend([random.choice(num) for i in range(9)])
+        account_num = "".join(acc)
+        
+        # if account_num in user_data.keys():
+        #     return generate_acc_num()
+        
+        return account_num
+    user=request.data
+    user_data = {
+        'first_name': user['first_name'],
+        'last_name': user['last_name'], 
+        'account_num': generate_acc_num(), 
+        'email': user['email'],
+        'password':user['password'], 
+        'phone': user['phone'], 
+        'branch': user['branch'], 
+        'bank_name': user['bank_name']
+    }
+
+    
     if request.method == "POST":
     #Allows user to signup or create account
-        serializer = UserSerializer(data=request.data) #deserialize the data
+        serializer = UserSerializer(data=user_data) #deserialize the data
         
-        if serializer.is_valid(): #validate the data that was passed
-            user=User.objects.create(first_name=serializer.data['first_name'], last_name=serializer.data['last_name'], email=serializer.data['email'], password=serializer.data['password'], phone=serializer.data['phone'], branch=serializer.data['branch'], bank_name=serializer.data['bank_name'], date_created=serializer.data['date_created'] account_num=account_num))
-            if "user" in serializer.validated_data.keys():
-                serializer.validated_data.pop("account_num") 
-                user= serializer.validated_data["user"]
-           
-                if user: 
-                # user = User.objects.create(account_num)
-                    num = [str(i) for i in range(10)]
-                    account = ['9']
-                    account.extend([random.choice(num) for i in range(9)])
-                    account_num = "".join(account) 
-                    serializer.save()
-                    data = {
-                        'message' : 'success',
-                        'data'  : serializer.data
-                    }
-                    return Response(data, status=status.HTTP_201_CREATED)
-                else:
-                    data = {
-                        'message' : 'failed',
-                        'error'  : serializer.errors
-                    }
-                    return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        if serializer.is_valid(): #validate the data that was passed 
+            serializer.save()
+            data = {
+                'message' : 'success',
+                'data'  : serializer.data
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
+        else:
+            data = {
+                'message' : 'failed',
+                'error'  : serializer.errors
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-   
+@swagger_auto_schema(methods=['PUT'] ,
+                    request_body=UserSerializer())
+@api_view(['GET','PUT','DELETE'])
+@authentication_classes([BasicAuthentication])
+# @permission_classes([IsAuthenticated])
+def update_view(request, user_id):
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+
+        data = {
+            'message' : 'failed',
+            'error'  : f"User with ID {user_id} does not exist."
+        }
+        return Response(data, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == "GET":
+        serializer = UserSerializer(user)
+        
+        data = {
+           "message":"successful",
+           "data": serializer.data
+        }
+    
+    
+        return Response(data, status=status.HTTP_200_OK)
+
+    if request.method == 'PUT':
+        # user=request.data
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            # if 'password' in serializer.validated_data.keys():
+            #     raise ValidationError(detail={
+            #         "message":"Edit password action not allowed"
+            #     }, code=status.HTTP_403_FORBIDDEN)
+                    
+            serializer.save()
+            data = {
+                'message' : 'success',
+                'data'  : serializer.data
+            }
+            return Response(data, status=status.HTTP_202_ACCEPTED)
+        else:
+            data = {
+                'message' : 'failed',
+                'error'  : serializer.errors
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            
+    elif request.method=="DELETE":
+        user.delete()
+        
+        return Response({}, status=status.HTTP_204_NO_CONTENT)   
+
         
 
 @swagger_auto_schema(method='post', 
                     request_body=LoginSerializer())
+# @authentication_classes([BasicAuthentication])
+# @permission_classes([IsAuthenticated])
 @api_view(['POST'])
 def login_view(request):
+    serializer = LoginSerializer(data=request.data)
 
     if request.method == "POST":
 
-        serializer = LoginSerializer(data=request.data)
+       
         
         if serializer.is_valid():
             
@@ -133,6 +217,7 @@ def login_view(request):
                                                     'first_name',
                                                     'last_name',
                                                     'email',
+                                                    'account_num',
                                                     'phone',
                                                     'is_admin'])
                     }

@@ -35,7 +35,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'main',
+    'account',
     'drf_yasg',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -132,7 +132,7 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'main.User'
+AUTH_USER_MODEL = 'account.User'
 
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # DEFAULT_FROM_EMAIL = 'gloryglow99@gmail.com'
@@ -144,14 +144,9 @@ AUTH_USER_MODEL = 'main.User'
 # EMAIL_USE_TLS = True
 
 REST_FRAMEWORK = {
-    #   'DEFAULT_PERMISSION_CLASSES': (
-    #     'rest_framework.permissions.IsAuthenticated',
-    # ),
+   
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',
-        # 'rest_framework.authentication.BasicAuthentication',
-    
+        'rest_framework_simplejwt.authentication.JWTAuthentication',    
 
     ]
 }

@@ -1,16 +1,12 @@
 # import code
 # import email
 import random
-# from lib2to3.pgen2 import token
-# from pyexpat import model
-# from pyexpat import model
-# from tokenize import Token
-# import email
+
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework.exceptions import ValidationError
 # from BankAPI.main.models import Account
-from main.models import User
+from account.models import User
 # from django.core.mail import send_mail
 # import jwt
 # from datetime import datetime, timedelta
