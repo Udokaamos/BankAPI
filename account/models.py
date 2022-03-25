@@ -35,6 +35,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(_('last name'), max_length=30, blank=True)
     account_num = models.FloatField(_('account num'),  blank=True, unique=True)
     bank_name = models.CharField(_('bank name'), max_length= 200, choices=BANK, blank=True)
+    account_balance = models.FloatField(_('account balance'), max_length= 50, blank=True)
     branch = models.CharField(_('branch name'), max_length=100, blank=True)
     branch_address = models.CharField(('branch address'), max_length=250)
     date_created = models.DateTimeField(_('date created'), auto_now_add=True)
@@ -77,49 +78,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 
-# class Client(models.Model):
-#     name = models.CharField(max_length=250)
-#     email = models.CharField(max_length=250)
-
-#     def json_object(self):
-#         return {
-#             "name":self.name,
-#             "address":self.email
-#         }
-
-#     def __str_(self):
-# #         return self.name
-
-# class Account(models.Model):
-#     # email = models.EmailField()
-#     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="account")   
-#     date_created = models.DateTimeField(_('date created'), auto_now_add=True)
-
-     
-#     def __str__(self) -> str:
-#         return self.user
-
-#     @property
-#     def account_num(self):
-#         return model_to_dict(self.user)
-    # def __str__(self) -> str:
-    #     return f"{self.email}"
-    
-    
-    # def is_expired(self):
-    #     return timezone.now() > self.expiry_date
-
-
-#     def json_object(self):
-#         return {
-#             "open_date":self.open_date,
-#             "account_type":self.account_type,
-#             "bank":self.bank
-
-#         }
-
-#     def __str__(self):
-#         return self.account_type
 
 
 # class Transfer(models.Model):

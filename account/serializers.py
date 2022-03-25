@@ -23,7 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         #fields = '__all__'
-        fields = ['id','first_name', 'last_name','account_num', 'email', 'password', 'phone','branch','bank_name','date_created']
+        fields = ['id','first_name', 'last_name','account_num', 'account_balance', 'email', 'password', 'phone','branch','bank_name','date_created']
 
 
 
