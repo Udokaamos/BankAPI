@@ -1,11 +1,12 @@
-# from lib2to3.pgen2 import token
 import random
-# from typing_extensions import Self
+from tokenize import String
+from typing_extensions import Self
+from unicodedata import name
 from rest_framework.response import Response
 from rest_framework import status 
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from .serializers import  UserSerializer, LoginSerializer
+from .serializers import  UserSerializer, LoginSerializer, WithdrawSerializer, TransferSerializer, DepositSerializer
 from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -22,19 +23,7 @@ User = get_user_model()
 
 
 @api_view(['GET'])
-@authentication_classes([BasicAuthentication])
-# @permission_classes([IsAdminUser])
 def user_view(request):
-
-    # try:
-    #     user = User.objects.get(id=user_id)
-    # except User.DoesNotExist:
-
-    #     data = {
-    #         'message' : 'failed',
-    #         'error'  : f"Post with ID {user_id} does not exist."
-    #     }
-    #     return Response(data, status=status.HTTP_404_NOT_FOUND)
     
     if request.method == 'GET':
         # Get all the users in the database
@@ -47,8 +36,6 @@ def user_view(request):
            "data": serializer.data
         }
     
-    
-        # return JsonResponse(data)
         return Response(data, status=status.HTTP_200_OK)
     
 
@@ -87,9 +74,7 @@ def user_view(request):
                     }
 )
 
-# account_number = generate_acc_num()
 
-# print(account_number)
 
 @api_view(['POST'])
 @authentication_classes([BasicAuthentication])
@@ -101,8 +86,6 @@ def signup_view(request):
         acc.extend([random.choice(num) for i in range(9)])
         account_num = "".join(acc)
         
-        # if account_num in user_data.keys():
-        #     return generate_acc_num()
         
         return account_num
     user=request.data
@@ -110,6 +93,7 @@ def signup_view(request):
         'first_name': user['first_name'],
         'last_name': user['last_name'], 
         'account_num': generate_acc_num(), 
+        'account_balance': user['account_balance'],
         'email': user['email'],
         'password':user['password'], 
         'phone': user['phone'], 
@@ -140,7 +124,6 @@ def signup_view(request):
                     request_body=UserSerializer())
 @api_view(['GET','PUT','DELETE'])
 @authentication_classes([BasicAuthentication])
-# @permission_classes([IsAuthenticated])
 def update_view(request, user_id):
 
     try:
@@ -152,7 +135,7 @@ def update_view(request, user_id):
             'error'  : f"User with ID {user_id} does not exist."
         }
         return Response(data, status=status.HTTP_404_NOT_FOUND)
-    
+    user = request.user
     if request.method == "GET":
         serializer = UserSerializer(user)
         
@@ -164,14 +147,9 @@ def update_view(request, user_id):
     
         return Response(data, status=status.HTTP_200_OK)
 
-    if request.method == 'PUT':
-        # user=request.data
+    elif request.method == 'PUT':
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
-            # if 'password' in serializer.validated_data.keys():
-            #     raise ValidationError(detail={
-            #         "message":"Edit password action not allowed"
-            #     }, code=status.HTTP_403_FORBIDDEN)
                     
             serializer.save()
             data = {
@@ -195,8 +173,6 @@ def update_view(request, user_id):
 
 @swagger_auto_schema(method='post', 
                     request_body=LoginSerializer())
-# @authentication_classes([BasicAuthentication])
-# @permission_classes([IsAuthenticated])
 @api_view(['POST'])
 def login_view(request):
     serializer = LoginSerializer(data=request.data)
@@ -218,10 +194,11 @@ def login_view(request):
                                                     'last_name',
                                                     'email',
                                                     'account_num',
+                                                    'account_balance',
                                                     'phone',
                                                     'is_admin'])
                     }
-                return Response(data, status=status.HTTP_201_CREATED)
+                return Response(data, status=status.HTTP_200_OK)
             else:
                 data = {
                         'message' : 'Please enter a valid email and password'
@@ -236,123 +213,172 @@ def login_view(request):
     
     
 
+@swagger_auto_schema(methods=['POST'] ,
+                    request_body=DepositSerializer())
+@api_view([ 'POST'])
+@authentication_classes([BasicAuthentication])
+def deposit(request, user_id):
 
-# @swagger_auto_schema(methods=['POST'] ,
-#                     request_body=AccountSerializer())
-# @api_view(['POST'])
-# @authentication_classes([BasicAuthentication])
-# # @permission_classes([IsAuthenticated])
-# def generate_acc_num(request):
-#     user= request.user
-#     if request.method == "POST":
-#         serializer = AccountSerializer(user)
-        
-#         data = {
-#            "message":"successful",
-#            "data": serializer.data
-#        }
 
-# @swagger_auto_schema(methods=['POST'] ,
-#                     request_body=LoginSerializer())
-# @api_view(["POST"])
-# @authentication_classes([BasicAuthentication])
-#  # @permission_classes([IsAuthenticated])
-# def generate_acc_num(request, account_num):
+    if request.method == "POST":
+
+        for user in User.objects.all():
+            if user.id == user_id:
+                user_data = {
+                    'account_balance': request.data['deposit_amount'] + user.account_balance,
+                    'id': user_id,
+                    'email': user.email,
+                    'phone': user.phone,
+                    'password': user.password
+                    
+                }
+
+                deposit_data = {
+                    'deposit_amount': request.data['deposit_amount'],
+                    'id': user_id
+                }
+
+                
+                user_serializer = UserSerializer(instance=user, data=user_data)
+                deposit_serializer = DepositSerializer(instance=user, data=deposit_data)
+                if user_serializer.is_valid():
     
-#     if request.method == "POST":
+                #Allows user to signup or create account
 
-#         serializer = LoginSerializer(data=request.account_num)
+                
+                    if deposit_serializer.is_valid(): #validate the data that was passed
+                        deposit_serializer.validated_data.update={
+                            'account_balance'
+                            }
+                        
+            
+                        deposit_serializer.save(),
+                        user_serializer.save()
+                        data = {
+                            'message' : 'success',
+                            'data'  : deposit_serializer.data
+                        }
+                        
+                        return Response(data, status=status.HTTP_201_CREATED)
+                    else:
+                        data = {
+                            'message' : 'failed',
+                            'error'  : deposit_serializer.errors
+                        }
+                        return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@swagger_auto_schema(methods=['POST'] ,
+                    request_body=TransferSerializer())
+@api_view(['POST'])
+def transfers(request, user_id):
+
+    if request.method == "POST":
+        for user in User.objects.all():
+            if user.id == user_id:
+                user_data = {
+                    'account_balance': user.account_balance - request.data['trans_amount'],
+                    'id': user_id,
+                    'email': user.email,
+                    'phone': user.phone,
+                    'password': user.password
+                }
+
+                transfer_data = {
+                    'recipient_name': request.data['recipient_name'],
+                    'recipient_acc_num': request.data['recipient_acc_num'],
+                    'trans_amount': request.data['trans_amount'],
+                    'id': user_id
+                }
+            
+                user_serializer = UserSerializer(instance=user, data=user_data)
         
-#         if serializer.is_valid():
-            
-#             user = authenticate(email=serializer.validated_data['email'], password=serializer.validated_data['password'])
-            
-#             if user: 
-#                 user = User.objects.create(account_num)
-#                 num = [str(i) for i in range(10)]
-#                 account = ['9']
-#                 account.extend([random.choice(num) for i in range(9)])
-#                 account_num = "".join(account)
-#                 data = {
-#                         'message' : 'success',
-#                         'data'  : model_to_dict(user, ['id', 
-#                                                     'first_name',
-#                                                     'last_name',
-#                                                     'email',
-#                                                     'phone',
-#                                                     'account_num',
-#                                                     'is_admin'])
-#                     }
-#                 return Response(account_num, status=status.HTTP_201_CREATED)
-#             else:
-#                 data = {
-#                         'message' : 'Please enter a valid email and password'
-#                     }
-#                 return Response(data, status=status.HTTP_401_UNAUTHORIZED)
-#         else:
-#             data = {
-#                 'message' : 'failed',
-#                 'error'  : serializer.errors
-#             }
-#             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+                transfer_serializer = TransferSerializer(instance=user, data=transfer_data)
+                if user_serializer.is_valid():
+                    
+                    if transfer_serializer.is_valid():   
+                        if  user.account_balance >= request.data['trans_amount']: 
+                            transfer_serializer.save(),
+                            user_serializer.save()
+                            data = {
+                                'message' : 'Transfer Successful',
+                                'data'  : transfer_serializer.data
+                                
+                            }
+                            return Response(data, status=status.HTTP_202_ACCEPTED)
+        
+                            
+                        elif request.data['trans_amount'] > user.account_balance:
+                            data = {
+                                'message' : 'failed',
+                                'error'  : 'Transfer amount must not be greater than the ledger balance.'
+                            }
+                            return Response(data, status=status.HTTP_403_FORBIDDEN)
 
+                        
+                    else:
+                        data = {
+                            'message' : 'failed',
+                            'error'  : transfer_serializer.errors
+                            
+                        }
+                        return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
+@swagger_auto_schema(methods=['POST'] ,
+                    request_body=WithdrawSerializer())
+@api_view(['POST'])
+def withdrawal(request, user_id):
+    
+    
+    if request.method == 'POST':
+    
+        for user in User.objects.all():
+            if user.id == user_id:
+                user_data = {
+                    'account_balance': user.account_balance - request.data['withdrawal_amount'],
+                    'id': user_id,
+                    'email': user.email,
+                    'phone': user.phone,
+                    'password': user.password
 
+                }
 
-# @swagger_auto_schema(methods=['POST'] ,
-#                     request_body=MenuSerializer())
-# @api_view(['POST'])
-# @authentication_classes([BasicAuthentication])
-# @permission_classes([IsAuthenticated])
-# def make_carts(request,vendor_user_id): 
-#     # add food to cart
-#     user=request.user  #user creating cart 
-#     if user.is_customer==False:
-#         raise PermissionDenied(detail={"message":f"Permission Denied. Only customers can perform this action"})
-#     if request.method == 'POST':
-#         serializer = CartSerializer(data=request.data)
-#         if serializer.is_valid(): 
-#             if "user" in serializer.validated_data.keys():
-#                 serializer.validated_data.pop("user")  
-#             food = serializer.validated_data["food"]
-#             ven=User.objects.filter(id=vendor_user_id)
-#             if ven.exists():
-#                 pass
-#             else:
-#                 data = {
-#                 'message' : 'Vendor does not exist',
-#             }
-#                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
+                withdrawal_data = {
+                    'withdrawal_amount': request.data['withdrawal_amount'],
+                    'id': user_id
+                }
 
-#             check = Menu.objects.filter(food=food,user=User.objects.get(id=vendor_user_id))
-#             if check.exists():
-#                 pass
-#             else:
-#                 raise PermissionDenied(detail={"message":f"Vendor {vendor_user_id} does not have this item."}) 
+                
+                user_serializer = UserSerializer(instance=user, data=user_data)
+                withdrawal_serializer = WithdrawSerializer(instance=user, data=withdrawal_data)
+                if user_serializer.is_valid():
+                    
+                    if withdrawal_serializer.is_valid(): 
+                        # withdrawal_serializer.save()
+                        if user.account_balance >= request.data['withdrawal_amount']:  
+                            withdrawal_serializer.save(),
+                            user_serializer.save()
+                            data = {
+                                'message' : 'successful withdrawal',
+                                'data'  : withdrawal_serializer.data
+                            }
+                            return Response(data, status=status.HTTP_200_OK)
+                        
+                     
 
-            
-#             if len(Cart.objects.filter(user=user)) != 0:
-#                 diff_vens=Cart.objects.filter(user=user).first() #checks if the item has a diff vendor from what is already in cart
-#                 if diff_vens.food.user.id != vendor_user_id:
-#                     data = {
-#                     'message' : 'Cart can only contain food from one vendor',
-#                 }
-#                     return Response(data, status=status.HTTP_400_BAD_REQUEST)
+                        elif request.data['withdrawal_amount'] > user.account_balance:
+                            data = {
+                                'message' : 'failed',
+                                'error'  :  f' Insufficient funds!!'
+                            }
+                            return Response(data, status=status.HTTP_403_FORBIDDEN)
 
+                    else:
+                        data = {
+                            'message' : 'failed',
+                            'error'  : withdrawal_serializer.errors
+                        }
+                        return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-            
-
-#             cart = Cart.objects.create(user=user, food=food)
-#             new_serializer = CartSerializer(cart)
-            
-#             data = {
-#                 'message' : 'success',
-#                 'data'  : new_serializer.data
-#             }
-#             return Response(data, status=status.HTTP_202_ACCEPTED)
-#         else:
-#             data = {
-#                 'message' : 'failed',
-#                 'error'  : serializer.errors
-#             }
-#             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+                
