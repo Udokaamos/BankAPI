@@ -67,5 +67,3 @@ class Transfer(models.Model):
 class Withdraw(models.Model):
     withdrawal_amount = models.FloatField()
    
-
-

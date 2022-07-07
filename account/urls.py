@@ -16,8 +16,4 @@ urlpatterns = [
     path('transactions/withdrawal/<int:user_id>', views.withdrawal, name="withdrawals"), 
     path('token/', TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path('token/refresh/', TokenRefreshView.as_view(), name="token_refresh"),
-    
-
-    
-    
 ]
