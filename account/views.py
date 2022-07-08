@@ -37,7 +37,6 @@ def user_view(request):
         }
     
         return Response(data, status=status.HTTP_200_OK)
-    
 
 
 @swagger_auto_schema(method='post', 
