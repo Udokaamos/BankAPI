@@ -1,5 +1,5 @@
 .env
-.sqlite3
+db.sqlite3
 account/__pycache_/
 account/migrations/__pycache_/
 *$py.class
