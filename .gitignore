@@ -1,7 +1,6 @@
 .env
 db.sqlite3
-account/__pycache_/
-account/migrations/__pycache_/
+account/
 *$py.class
 
 # C extensions
