@@ -1,7 +1,7 @@
-*.env
-*.sqlite3
-*__pycache__
-*.py[cod]
+.env
+.sqlite3
+account/__pycache_/
+account/migrations/__pycache_/
 *$py.class
 
 # C extensions
