@@ -23,7 +23,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone = models.FloatField(_('phone number'), unique=True, max_length=11)
     first_name = models.CharField(_('first name'), max_length=30, blank=True)
     last_name = models.CharField(_('last name'), max_length=30, blank=True)
-    account_num = models.FloatField(_('account num'), blank=True, unique=True, default=0)
+    account_num = models.PositiveIntegerField(_('account num'), blank=True, unique=True, default=0)
     account_type = models.CharField(max_length=355, blank=True)
     bank_name = models.CharField(_('bank name'), max_length= 200, choices=BANK, blank=True)
     account_balance = models.FloatField(_('account balance'), max_length= 50, null=True, blank=True)
