@@ -36,7 +36,6 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'account',
-    'transactions',
     'drf_yasg',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -87,6 +86,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+    
 }
 
 
