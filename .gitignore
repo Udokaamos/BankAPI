@@ -1,5 +1,8 @@
 .env
 db.sqlite3
+
+
+
 account/__pycache_
 account/migrations/__pycache_/
 BankAPI/__pycache_/
@@ -10,3 +13,5 @@ BankAPI/__pycache_/
 
 # Distribution / packaging
 .Python
+
+Pipfile
