@@ -1,2 +1,17 @@
-*.env
-*.sqlite3
+.env
+db.sqlite3
+
+
+
+account/__pycache_
+account/migrations/__pycache_/
+BankAPI/__pycache_/
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+
+Pipfile

@@ -40,20 +40,6 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('v1/account/', include('account.urls')),
-    path('v1/', include('transactions.urls')),
     path("",schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui')
 ]
 
-# from django.contrib import admin
-# from django.urls import path, include
-# from . import views
-# from rest_framework_simplejwt import views as jwt_views
-
-
-
-# urlpatterns = [
-#     path('admin/', admin.site.urls),
-#     path('v1/', include('main.urls')),
-#     # path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
-#     # path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
-# ]
