@@ -1,5 +1,4 @@
 import random
-from tokenize import String
 from typing_extensions import Self
 from unicodedata import name
 from rest_framework.response import Response
