@@ -3,15 +3,15 @@ db.sqlite3
 
 Pipfile
 
-account/__pycache_
-account/migrations/__pycache_/
-BankAPI/__pycache_/
-*$py.class
+# account/__pycache_
+# account/migrations/__pycache_/
+# BankAPI/__pycache_/
+# *$py.class
 
 # C extensions
-*.so
+# *.so
 
 # Distribution / packaging
-.Python
+# .Python
 
 
