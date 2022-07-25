@@ -37,6 +37,7 @@ ALLOWED_HOSTS = ['gloria-bank-api.herokuapp.com']
 INSTALLED_APPS = [
     'account',
     'drf_yasg',
+    'coreapi',
     'rest_framework',
     'rest_framework_simplejwt',
     'django.contrib.admin',
